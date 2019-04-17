@@ -4,18 +4,17 @@ var express = require('express'),
     app = express(),
     bodyParser = require("body-parser"),
     bcrypt = require('bcrypt'),
-    jwt = require('jsonwebtoken');
-let mongoose = require('mongoose');
+    jwt = require('jsonwebtoken'),
+    mongoose = require('mongoose');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-var authURL = 'mongodb+srv://lusky75:iiluskyii75@cluster0-nxj2d.mongodb.net/test?retryWrites=true';
+var authURL = 'mongodb+srv://lusky75:iiluskyii75@cluster0-usamg.mongodb.net/test?retryWrites=true';
 mongoose.connect(authURL, { useCreateIndex: true, useNewUrlParser: true });
 
-var RouterAPI = require('./routes/RouterAPI').router;
-
-app.use(RouterAPI);
+var userAPI = require('./routes/RouterAPI').user;
+app.use('/user', userAPI);
 
 app.listen(port, hostname, function(){
     console.log("Mon serveur fonctionne sur http://" + hostname + ":" + port);

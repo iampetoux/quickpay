@@ -6,6 +6,7 @@ const userSchema = mongoose.Schema({
     _id: mongoose.Types.ObjectId,
     name: String,
     email: String,
+    admin: Number,
     password: {type: String}
 }, {versionKey: false // You should be aware of the outcome after set to false
 })
