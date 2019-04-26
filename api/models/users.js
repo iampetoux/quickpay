@@ -5,9 +5,10 @@ const mongoose = require('mongoose');
 const userSchema = mongoose.Schema({
     _id: mongoose.Types.ObjectId,
     name: String,
-    email: String,
+    email: {type: String, required:true},
     admin: Number,
-    password: {type: String}
+    password: {type: String, required:true},
+    picture: String
 }, {versionKey: false // You should be aware of the outcome after set to false
 })
 

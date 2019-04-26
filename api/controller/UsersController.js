@@ -1,7 +1,8 @@
 var bcrypt  = require('bcrypt'),
     jwt     = require('jsonwebtoken'),
-    User = require('../models/users'),
-    jwt_decode = require('jwt-decode')
+    User = require('../models/users');
+var jwt_decode = require('jwt-decode');
+
 let mongoose = require('mongoose');
 
 module.exports = {
@@ -110,9 +111,9 @@ module.exports = {
 
     updatePassword: function(req, res) {
         if (req.header.token != null) {
-            var email = jwt_decode(req.body.token).email;
+            var email = jwt_decode(req.body.token)._id;
             User.findOne({
-                email: email
+                _id: id
             }, function(err, user) {
                 if (user) {
                     if (req.body.password == null) {
@@ -178,5 +179,25 @@ module.exports = {
         } else {
             res.send({message: "Unregistration failed. You need to send the authentication token."});
         }
+    },
+
+    addPhoto: function(req, res) {
+        //if (req.headers.token != null) {
+            //let id = jwt_decode(req.body.token)._id
+            //User.findOne({
+            //    _id: id
+            //}, function(err, user) {
+                if (req.file) {
+                    console.log(req.file);
+                    file = req.file
+                    res.send(file)
+                }
+                if (err)
+                    res.send(err);
+                res.send({message:"ok"})
+            //})
+        //} else {
+        //    res.send({message: "not connected"});
+        //}
     }
 }
