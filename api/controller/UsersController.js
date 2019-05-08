@@ -136,12 +136,12 @@ module.exports = {
         }
     },
 
-    delete: function(req, res) {
+    deleteUser: function(req, res) {
         if (req.body.token != null) {
             var admin = jwt_decode(req.body.token).admin;
             var id = jwt_decode(req.body.token)._id;
             if (id == req.body.id)
-                res.send("You cannot delete your own account, go unregister !");
+                res.send("You cannot delete your own account, go to unregister section !");
             if (admin == 1) {
                 User.findOne({
                     _id: req.body.id

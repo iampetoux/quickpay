@@ -20,7 +20,7 @@ exports.user = (function(){
     user.route('/users').get(usersController.listUsers);
     user.route('/users').put(usersController.updateProfile);
     user.route('/users/password').put(usersController.updatePassword);
-    user.route('/users/').delete(usersController.delete);
+    user.route('/users/').delete(usersController.deleteUser);
     user.route('/unregister/').delete(usersController.unregister);
     user.post("/profile/photo", upload.single("filename"), usersController.addPhoto);
     //user.route('/profile/photo').post(upload.single("foo-bar"),usersController.addPhoto);
