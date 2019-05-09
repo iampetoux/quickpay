@@ -1,18 +1,29 @@
 import React from 'react';
-import { Button, View, Text, Alert } from 'react-native';
+import { Button, View, Text, Alert, AsyncStorage } from 'react-native';
 import { Actions } from 'react-native-router-flux';
 
 class Home extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+        email: '',
+    };
+    this.init_email();
+  }
+
+  init_email() {
+    AsyncStorage.getItem('email', (err, getEmail) => {
+        this.setState(
+            { email : getEmail }
+        )
+    });
+}
   static navigationOptions = {
     title: 'Home'
    };
 
   login() {
       Actions.replace("login");
-  }
-
-  photo() {
-      Actions.replace("photo");
   }
 
  render() {
@@ -23,11 +34,13 @@ class Home extends React.Component {
    justifyContent:'center'
   }}>
 
+  <Text
+   value={this.state.email}>
+    welcome {this.state.email}
+    </Text>
+
    <Button title="Go back to Login"
    onPress={() => this.login()} 
-   />
-   <Button title="Go take picture"
-   onPress={() => this.photo()}
    />
   </View>
 );
