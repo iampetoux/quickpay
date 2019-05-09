@@ -1,6 +1,7 @@
 var bcrypt  = require('bcrypt'),
     jwt     = require('jsonwebtoken'),
     User = require('../models/users');
+    modelhelper = require('../models/model-helper')
 var jwt_decode = require('jwt-decode');
 
 let mongoose = require('mongoose');
@@ -20,7 +21,7 @@ module.exports = {
                         admin: 0,
                         password: bcrypt.hashSync(req.body.password, 10)
                     });
-                    if (user.validateEmail(req.body.email)) {
+                    if (user.modeHelper.validateEmail(req.body.email)) {
                         user.save().then(result => {
                             console.log(result);
                         }).catch(err => console.log(err));
@@ -46,7 +47,7 @@ module.exports = {
                     res.send(err);
                 }
                 if (user) {
-                    if (!user.comparePassword(req.body.password)) {
+                    if (!user.modelHelper.comparePassword(req.body.password)) {
                         return res.status(401).json({message: 'Authentication failed. Invalid password.'});
                     }
                     return res.json({
@@ -121,7 +122,7 @@ module.exports = {
                     } else if (req.body.new_password == null) {
                         res.send({message: "Update password failed. Your new password field is empty."})
                     } else {
-                        if (!user.comparePassword(req.body.password)) {
+                        if (!user.modelHelper.comparePassword(req.body.password)) {
                             return res.status(401).json({message: 'Update password failed. Current password is incorrect.'});
                         } else {
                             user.password = bcrypt.hashSync(req.body.new_password, 10);
