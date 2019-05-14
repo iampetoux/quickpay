@@ -1,51 +1,79 @@
-import React from 'react'
-import { View, Text, Image, Button, TouchableOpacity } from 'react-native'
-import ImagePicker from 'react-native-image-picker'
+import React from 'react';
+import { Button, Image, View, AsyncStorage } from 'react-native';
+import { ImagePicker } from 'expo';
+import axios from 'axios';
 
-const options = {
-    title: 'my photo',
-    takePhotoButtonTitle: 'take photo with your camera',
-    chooseFromLibraryButtonTitle: 'choose photo from library',
-}
-
-export default class Photo extends React.Component {
-
+export default class ImagePickerExample extends React.Component {
   constructor(props) {
-      super(props);
-      this.state = {
-        avatarSource: null
-      }
-  }
-
-  myfun() {
-    ImagePicker.showImagePicker(options, (response) => {
-        console.log('Response = ', response);
-        if (response.didCancel) {
-            console.log('User cancelled image picker');
-        } else if (response.error) {
-            console.log('ImagePicker Error: ', reponse.error);
-        } else if (response.customButton) {
-            console.log('User tapped custom button: ', reponse.customButton);
-        } else {
-          let source = { uri: response.uri };
-          this.setState({ avatarSource: source });
-        }
-    });
-    alert('clicked');
+    super(props);
+    this.state = {
+        image:null,
+        token: ''
+    };
+    this.init_token();
   }
 
   render() {
-    const { photo } = this.state
+    let { image } = this.state;
+
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        
-        <Image source={this.state.avatarSource} style ={{width:'100%', height:200, margin:10}}/>
-        <TouchableOpacity style={{backgroundColor: 'green', margin: 10, padding:10}}
-        onPress={this.myfun}>
-          <Text style={{color:'#fff'}}>Select Image</Text>
-        </TouchableOpacity>
-        <Button title="Choose Photo" onPress={this.handleChoosePhoto} />
+        <Button
+          title="Pick an image from your gallery !"
+          onPress={this._pickImage}
+        />
+        {image &&
+          <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
+        <Button
+          title="Add photo"
+          onPress={() => this.addphoto()} 
+        />
       </View>
-    )
+    );
   }
+
+  init_token() {
+    AsyncStorage.getItem('token', (err, getToken) => {
+        this.setState(
+            { token : getToken }
+        )
+    });
+  }
+
+  addphoto () {
+    console.log(this.state.image);
+    const formData = new FormData();
+    formData.append('filename', {uri: this.state.image, name:'test.jpg', type:'image/jpeg'});
+    const config = {
+      headers: {
+          'content-type': 'multipart/form-data',
+          'token': this.state.token
+      }
+    };
+    axios.post('http://10.0.2.2:3000/user/profile/photo',formData, config
+    ).then(response => {
+      let obj = response.data
+      console.log(obj);
+  }).catch(error => {
+      ToastAndroid.showWithGravity(
+        "Invalid email or password.",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      );
+  })
+  }
+
+
+  _pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+    });
+
+    console.log(result);
+
+    if (!result.cancelled) {
+      this.setState({ image: result.uri });
+    }
+  };
 }
