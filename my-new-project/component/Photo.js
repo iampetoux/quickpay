@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Image, View, AsyncStorage } from 'react-native';
 import { ImagePicker } from 'expo';
 import axios from 'axios';
+import { Actions } from 'react-native-router-flux';
 
 export default class ImagePickerExample extends React.Component {
   constructor(props) {
@@ -24,9 +25,14 @@ export default class ImagePickerExample extends React.Component {
         />
         {image &&
           <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
+
+        <Button
+          title="Take a picture"
+          onPress={this.camera}
+        />
         <Button
           title="Add photo"
-          onPress={() => this.addphoto()} 
+          onPress={() => this.addphoto()}
         />
       </View>
     );
@@ -40,20 +46,33 @@ export default class ImagePickerExample extends React.Component {
     });
   }
 
+  camera = async () => {
+    await this.askPermissionsAsync();
+        let result = await ImagePicker.launchCameraAsync({
+            // allowsEditing: true,
+            aspect: [1, 1],
+            base64: false,
+        });
+
+        if (!result.cancelled) {
+
+        }
+  };
+
   addphoto () {
     console.log(this.state.image);
     const formData = new FormData();
-    formData.append('filename', {uri: this.state.image, name:'test.jpg', type:'image/jpeg'});
+    formData.append('filename', {uri: this.state.image, name:'ok.jpg', type:'image/jpeg'});
     const config = {
       headers: {
           'content-type': 'multipart/form-data',
           'token': this.state.token
       }
     };
-    axios.post('http://10.0.2.2:3000/user/profile/photo',formData, config
-    ).then(response => {
+    console.log(config);
+    axios.post('http://10.0.2.2:3000/user/profile/photo',formData, config).then(response => {
       let obj = response.data
-      console.log(obj);
+      Actions.replace("home");
   }).catch(error => {
       ToastAndroid.showWithGravity(
         "Invalid email or password.",

@@ -1,10 +1,11 @@
 import React , { Component } from 'react';
-import { Router, Stack, Scene } from 'react-native-router-flux';
+import { Router, Stack, Scene, LeftButton } from 'react-native-router-flux';
 import Login from './component/Login';
 import Home from './component/Home';
 import Register from './component/Register';
 import Photo from './component/Photo';
 import Profile from './component/Profile';
+import UpdateProfile from './component/UpdateProfile';
 
 export default class Routes extends Component {
     render() {
@@ -18,7 +19,8 @@ export default class Routes extends Component {
                         <Scene key="photo" component={Photo} title="Photo" hideNavBar={true}/>
                         <Scene key="profile" component={Profile} title="Profile" hideNavBar={true}/>
                     </Scene>
-            
+            <Scene key="updateprofile" component={UpdateProfile} title="UpdateProfile"/>
+            <Scene key="profile" component={Profile} title="Profile"/>
             <Scene key="register" component={Register} title="Register"/>
             <Scene key="photo" component={Photo} title="Photo"/>
         </Stack>

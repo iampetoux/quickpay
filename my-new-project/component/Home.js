@@ -17,7 +17,7 @@ class Home extends React.Component {
             { email : getEmail }
         )
     });
-}
+  }
   static navigationOptions = {
     title: 'Home'
    };
