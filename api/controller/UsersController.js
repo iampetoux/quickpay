@@ -1,7 +1,6 @@
 var bcrypt  = require('bcrypt'),
     jwt     = require('jsonwebtoken'),
     User = require('../models/users');
-    modelhelper = require('../models/model-helper')
 var jwt_decode = require('jwt-decode');
 
 let mongoose = require('mongoose');
@@ -19,9 +18,10 @@ module.exports = {
                         name: req.body.name,
                         email: req.body.email,
                         admin: 0,
-                        password: bcrypt.hashSync(req.body.password, 10)
+                        password: bcrypt.hashSync(req.body.password, 10),
+                        picture: ""
                     });
-                    if (user.modeHelper.validateEmail(req.body.email)) {
+                    if (user.validateEmail(req.body.email)) {
                         user.save().then(result => {
                             console.log(result);
                         }).catch(err => console.log(err));
@@ -47,7 +47,7 @@ module.exports = {
                     res.send(err);
                 }
                 if (user) {
-                    if (!user.modelHelper.comparePassword(req.body.password)) {
+                    if (!user.comparePassword(req.body.password)) {
                         return res.status(401).json({message: 'Authentication failed. Invalid password.'});
                     }
                     return res.json({
@@ -63,8 +63,8 @@ module.exports = {
     },
 
     profile: function(req, res) {
-        if (req.header.token != null) {
-            var email = jwt_decode(req.body.token).email;
+        if (req.headers.token != null) {
+            var email = jwt_decode(req.headers.token).email;
             User.findOne({
                 email: email
             }, function(err, user) {
@@ -74,22 +74,27 @@ module.exports = {
                     res.send({message: "Profile not found."});
             })
         } else {
+            console.log(req.headers);
             res.send({message: "Access to profile forbidden ! You need to send the authentication token."})
         }
     },
 
     listUsers: function(req, res){
-        User.find(function(err, user){
+
+        User.find()
+        .select('_id email picture')
+        .exec()
+        .then(function(err, user){
             if (err) {
                 res.send(err);
             }
-            res.json(user);
+            res.json({user});
         })
     },
 
     updateProfile: function(req, res) {
-        if (req.header.token != null) {
-            var id = jwt_decode(req.body.token)._id;
+        if (req.headers.token != null) {
+            var id = jwt_decode(req.headers.token)._id;
             User.findOne({
                 _id: id
             }, function (err, user) {
@@ -111,8 +116,8 @@ module.exports = {
     },
 
     updatePassword: function(req, res) {
-        if (req.header.token != null) {
-            var email = jwt_decode(req.body.token)._id;
+        if (req.headers.token != null) {
+            var email = jwt_decode(req.headers.token)._id;
             User.findOne({
                 _id: id
             }, function(err, user) {
@@ -122,7 +127,7 @@ module.exports = {
                     } else if (req.body.new_password == null) {
                         res.send({message: "Update password failed. Your new password field is empty."})
                     } else {
-                        if (!user.modelHelper.comparePassword(req.body.password)) {
+                        if (!user.comparePassword(req.body.password)) {
                             return res.status(401).json({message: 'Update password failed. Current password is incorrect.'});
                         } else {
                             user.password = bcrypt.hashSync(req.body.new_password, 10);
@@ -137,12 +142,12 @@ module.exports = {
         }
     },
 
-    deleteUser: function(req, res) {
-        if (req.body.token != null) {
-            var admin = jwt_decode(req.body.token).admin;
-            var id = jwt_decode(req.body.token)._id;
+    delete: function(req, res) {
+        if (req.headers.token != null) {
+            var admin = jwt_decode(req.headers.token).admin;
+            var id = jwt_decode(req.headers.token)._id;
             if (id == req.body.id)
-                res.send("You cannot delete your own account, go to unregister section !");
+                res.send("You cannot delete your own account, go unregister !");
             if (admin == 1) {
                 User.findOne({
                     _id: req.body.id
@@ -164,8 +169,8 @@ module.exports = {
     },
 
     unregister: function(req, res) {
-        if (req.body.token != null) {
-            var id = jwt_decode(req.body.token)._id
+        if (req.headers.token != null) {
+            var id = jwt_decode(req.headers.token)._id
             User.findOne({
                 _id: id
             }, function(err, user) {
@@ -183,19 +188,22 @@ module.exports = {
     },
 
     addPhoto: function(req, res) {
-        //if (req.headers.token != null) {
-            //let id = jwt_decode(req.body.token)._id
-            //User.findOne({
-            //    _id: id
-            //}, function(err, user) {
+        if (req.headers.token != null) {
+            console.log(req.headers);
+            let id = jwt_decode(req.headers.token)._id
+            User.findOne({
+                _id: id
+            }, function(err, user) {
                 if (req.file) {
-                    console.log(req.file);
-                    file = req.file
-                    res.send(file)
+                    user.picture = req.file.path
+                    user.save();
+                    res.send(user);
+                    //user.save();
                 }
-                if (err)
-                    res.send(err);
-                res.send({message:"ok"})
+            })
+        } else {
+            res.send({message: "fail"});
+        }
             //})
         //} else {
         //    res.send({message: "not connected"});
