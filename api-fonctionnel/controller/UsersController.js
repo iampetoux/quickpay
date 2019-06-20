@@ -220,46 +220,17 @@ module.exports = {
               exp_year: 2020,
               cvc: '123'
             }
-          }).then(function(result, err) {
-              if (err) {
-                  res.send(err);
-              }
-              const tokenId = result["id"];
-              return stripe1.charges.create({
-                  amount: req.body.amount,
-                  currency: 'eur',
-                  source: tokenId,
-                  description: 'Test payment'
-              }).then(resultat => res.status(200).json(resultat)); 
-          }); 
-        /*
-        return stripe.charges
-        .create({
-            amount: req.body.amount, // tu mets au moins 50
-            currency: 'eur',
-            source: req.body.tokenId,                             
-            description: 'Test payment',
-        })
-        .then(result => res.status(200).json(result)); 
-        
-        stripe.tokens.create({
-  card: {
-    number: '4242424242424242',
-    exp_month: 12,
-    exp_year: 2020,
-    cvc: '123'
-  }
-}
-        return stripe.createToken('bank_account', {
-        country: 'US',
-        currency: 'usd',
-        routing_number: '110000000',
-        account_number: '000123456789',
-        account_holder_name: 'Jenny Rosen',
-        account_holder_type: 'individual',
-      })
-      .then(result => res.status(200).json(result)); 
-      */
-      
+        }).then(function(result, err) {
+            if (err) {
+              res.send(err);
+            }
+            const tokenId = result["id"];
+            return stripe1.charges.create({
+                amount: req.body.amount,
+                currency: 'eur',
+                source: tokenId,
+                description: 'Test payment'
+            }).then(resultat => res.status(200).json(resultat)); 
+        }); 
     }
 }
