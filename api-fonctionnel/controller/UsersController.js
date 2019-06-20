@@ -2,8 +2,8 @@ var bcrypt  = require('bcrypt'),
     jwt     = require('jsonwebtoken'),
     User = require('../models/users'),
     jwt_decode = require('jwt-decode'),
-    stripe = require('stripe')('pk_test_hlC7NqP41x0IIAWPCBbOoLgA00te54NVdC'),
-    stripe1 = require('stripe')('sk_test_JkLY9qfOJ8viaL1Ij1c8Qkcy00lbB8ZvFw');
+    //stripe = require('stripe')('pk_test_hlC7NqP41x0IIAWPCBbOoLgA00te54NVdC');
+    stripe = require('stripe')('sk_test_JkLY9qfOJ8viaL1Ij1c8Qkcy00lbB8ZvFw');
 
 let mongoose = require('mongoose');
 
@@ -225,7 +225,7 @@ module.exports = {
               res.send(err);
             }
             const tokenId = result["id"];
-            return stripe1.charges.create({
+            return stripe.charges.create({
                 amount: req.body.amount,
                 currency: 'eur',
                 source: tokenId,
