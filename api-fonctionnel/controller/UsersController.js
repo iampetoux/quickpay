@@ -2,8 +2,7 @@ var bcrypt  = require('bcrypt'),
     jwt     = require('jsonwebtoken'),
     User = require('../models/users'),
     jwt_decode = require('jwt-decode'),
-    //stripe = require('stripe')('pk_test_hlC7NqP41x0IIAWPCBbOoLgA00te54NVdC');
-    stripe = require('stripe')('sk_test_JkLY9qfOJ8viaL1Ij1c8Qkcy00lbB8ZvFw');
+    stripe = require('stripe')(process.env.PRIVATE_KEY);
 
 let mongoose = require('mongoose');
 
@@ -52,13 +51,13 @@ module.exports = {
                     if (!user.comparePassword(req.body.password)) {
                         return res.status(401).json({message: 'Authentication failed. Invalid password.'});
                     }
-                    return res.json({
+                    return res.status(200).json({
                         login: req.body.email,
                         message: "Login successful !",
                         token: jwt.sign({email: user.email, _id: user._id, admin: user.admin}, 'secret')
                     });
                 } else {
-                    res.status(400).json({message: 'Authentication failed. Invalid username.'});
+                    res.status(400).json({message: 'Authentication failed. Invalid password or username.'});
                 }
             }
         )
@@ -71,13 +70,13 @@ module.exports = {
                 email: email
             }, function(err, user) {
                 if (user)
-                    res.send(user)
+                    res.status(200).send(user)
                 else
-                    res.send({message: "Profile not found."});
+                    res.status(400).send({message: "Profile not found."});
             })
         } else {
             console.log(req.headers);
-            res.send({message: "Access to profile forbidden ! You need to send the authentication token."})
+            res.status(400).send({message: "Access to profile forbidden ! You need to send the authentication token."})
         }
     },
 
@@ -86,11 +85,11 @@ module.exports = {
         User.find()
         .select('_id email picture')
         .exec()
-        .then(function(err, user){
+        .then(function(user, err){
             if (err) {
-                res.send(err);
+                res.status(400).send(err);
             }
-            res.json({user});
+            res.status(200).json({user});
         })
     },
 
@@ -109,11 +108,11 @@ module.exports = {
                 if (req.body.admin != null)
                     user.admin = req.body.admin
                 user.save();
-                res.json({token: jwt.sign({email: user.email, _id: user._id, admin: user.admin}, 'secret'),
+                res.status(200).json({token: jwt.sign({email: user.email, _id: user._id, admin: user.admin}, 'secret'),
                     message: "Update successful !"});
             })
         } else {
-            res.send({message: "Update failed. You need to send the authentication token."});
+            res.status(400).send({message: "Update failed. You need to send the authentication token."});
         }
     },
 
@@ -125,22 +124,22 @@ module.exports = {
             }, function(err, user) {
                 if (user) {
                     if (req.body.password == null) {
-                        res.send({message: "Update password failed. Your current password field is empty."})
+                        res.status(400).send({message: "Update password failed. Your current password field is empty."})
                     } else if (req.body.new_password == null) {
-                        res.send({message: "Update password failed. Your new password field is empty."})
+                        res.status(400).send({message: "Update password failed. Your new password field is empty."})
                     } else {
                         if (!user.comparePassword(req.body.password)) {
                             return res.status(401).json({message: 'Update password failed. Current password is incorrect.'});
                         } else {
                             user.password = bcrypt.hashSync(req.body.new_password, 10);
                             user.save();
-                            return res.json({message: "Update password success !"})
+                            return res.status(200).json({message: "Update password success !"})
                         }
                     }
                 }
             })
         } else {
-            res.send({message: "Update password failed. You need to send the authentication token."});
+            res.status(400).send({message: "Update password failed. You need to send the authentication token."});
         }
     },
 
@@ -158,15 +157,15 @@ module.exports = {
                         res.send(err);
                     if (user != null) {
                         user.remove();
-                        res.send({message: "Delete successful !"})
+                        res.status(200).send({message: "Delete successful !"})
                     } else
-                        res.json({message:"Cannot delete. User not found."});
+                        res.status(400).json({message:"Cannot delete. User not found."});
                 })
             } else {
-                res.send("Deletion failed. You are not admin !")
+                res.status(400).send("Deletion failed. You are not admin !")
             }
         } else {
-            res.send({message: "Deletion failed. You need to send the authentication token."});
+            res.status(400).send({message: "Deletion failed. You need to send the authentication token."});
         }
     },
 
@@ -180,12 +179,12 @@ module.exports = {
                     res.send(err);
                 if (user != null) {
                     user.remove();
-                    res.send({message: "Unregister successful !"})
+                    res.status(200).send({message: "Unregister successful !"})
                 } else
-                    res.send({message: "Cannot unregister. This account doesn't exist."})
+                    res.status(400).send({message: "Cannot unregister. This account doesn't exist."})
             });
         } else {
-            res.send({message: "Unregistration failed. You need to send the authentication token."});
+            res.status(400).send({message: "Unregistration failed. You need to send the authentication token."});
         }
     },
 
@@ -196,15 +195,18 @@ module.exports = {
             User.findOne({
                 _id: id
             }, function(err, user) {
+                if (err) {
+                    res.send(err);
+                }
                 if (req.file) {
                     user.picture = req.file.path
                     user.save();
-                    res.send(user);
+                    res.status(200).send(user);
                     //user.save();
                 }
             })
         } else {
-            res.send({message: "fail"});
+            res.status(400).send({message: "fail"});
         }
             //})
         //} else {

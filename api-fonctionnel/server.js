@@ -1,17 +1,20 @@
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 var express = require('express'),
-    hostname = 'localhost',
-    port = 3000,
+    hostname = process.env.HOST,
+    port = process.env.PORT,
     app = express(),
     bodyParser = require("body-parser"),
     bcrypt = require('bcrypt'),
     jwt = require('jsonwebtoken'),
-    mongoose = require('mongoose')
+    mongoose = require('mongoose');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-//var authURL = 'mongodb+srv://lusky75:iiluskyii75@cluster0-usamg.mongodb.net/test?retryWrites=true';
-let authURL = 'mongodb://127.0.0.1:27017/test'
+let authURL = process.env.MONGO_URL
 try {
     mongoose.connect(authURL, { useCreateIndex: true, useNewUrlParser: true });
 } catch (err) {
@@ -22,7 +25,7 @@ var userAPI = require('./routes/RouterAPI').user;
 app.use('/user', userAPI);
 app.use('/uploads',express.static('uploads'));
 app.listen(port, hostname, function(){
-    console.log("Mon serveur fonctionne sur http://" + hostname + ":" + port);
+    console.log("Mon serveur fonctionne sur http://" + process.env.HOST + ":" + process.env.PORT);
 });
 
 /*
