@@ -44,9 +44,9 @@ module.exports = {
         User.findOne({
                 email:req.body.email
             }, function(err, user) {
-                if (err) {
-                    res.send(err);
-                }
+                /*if (err) {
+                    throw err; //res.send(err);
+                }*/
                 if (user) {
                     if (!user.comparePassword(req.body.password)) {
                         return res.status(401).json({message: 'Authentication failed. Invalid password.'});
@@ -215,24 +215,11 @@ module.exports = {
     },
 
     transaction: function(req, res) {
-        stripe.tokens.create({
-            card: {
-              number: '4242424242424242',
-              exp_month: 12,
-              exp_year: 2020,
-              cvc: '123'
-            }
-        }).then(function(result, err) {
-            if (err) {
-              res.send(err);
-            }
-            const tokenId = result["id"];
-            return stripe.charges.create({
-                amount: req.body.amount,
-                currency: 'eur',
-                source: tokenId,
-                description: 'Test payment'
-            }).then(resultat => res.status(200).json(resultat)); 
-        }); 
+        return stripe.charges.create({
+            amount: req.body.amount,
+            currency: 'eur',
+            source: req.body.token,
+            description: 'Test payment'
+        }).then(resultat => res.status(200).json(resultat)); 
     }
 }
