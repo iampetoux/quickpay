@@ -221,5 +221,14 @@ module.exports = {
             source: req.body.token,
             description: 'Test payment'
         }).then(resultat => res.status(200).json(resultat)); 
+    },
+
+    createStripeUser: function(req, res) {
+        return stripe.customers.create({
+            email: req.body.email,
+            source: req.body.token
+            //email: "paying.user@example.com",
+            //source: "src_18eYalAHEMiOZZp1l9ZTjSU0"
+        }).then(resultat => res.status(200).json(resultat));
     }
 }
