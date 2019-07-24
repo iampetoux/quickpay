@@ -211,7 +211,29 @@ module.exports = {
             //})
         //} else {
         //    res.send({message: "not connected"});
-        //}
+        //
+    },
+
+    account_token: function(req, res) {
+        return stripe.tokens.create({
+            account: {
+                individual: {
+                    first_name: 'Lucas',
+                    last_name: 'CHEN'
+                },
+                tos_shown_and_accepted: true,
+            },
+        }).then(resultat => res.status(200).json(resultat))
+        .catch(error => res.status(400).json(error));
+    },
+
+    account_stripe: function(req, res) {
+        return stripe.accounts.create({
+            country:'US',
+            type:'custom',
+            account_token: req.body.token,
+        }).then(resultat => res.status(200).json(resultat))
+        .catch(error => res.status(400).json(error));
     },
 
     transaction: function(req, res) {
@@ -220,15 +242,24 @@ module.exports = {
             currency: 'eur',
             source: req.body.token,
             description: 'Test payment'
-        }).then(resultat => res.status(200).json(resultat)); 
+        }).then(resultat => res.status(200).json(resultat))
+        .catch(error => res.status(400).json(error));
     },
 
     createStripeUser: function(req, res) {
         return stripe.customers.create({
             email: req.body.email,
             source: req.body.token
-            //email: "paying.user@example.com",
-            //source: "src_18eYalAHEMiOZZp1l9ZTjSU0"
-        }).then(resultat => res.status(200).json(resultat));
+        }).then(resultat => res.status(200).json(resultat))
+        .catch(error => res.status(400).json(error));
+    },
+
+    transfer: function(req, res) {
+        return stripe.transfers.create({
+            amount: req.body.amount,
+            currency: 'eur',
+            destination: req.body.destination
+        }).then(resultat => res.status(200).json(resultat))
+        .catch(error => res.status(400).json(error));
     }
 }
