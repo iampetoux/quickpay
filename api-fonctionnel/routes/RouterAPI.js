@@ -23,8 +23,11 @@ exports.user = (function(){
     user.route('/users/').delete(usersController.delete);
     user.route('/unregister/').delete(usersController.unregister);
     user.post("/profile/photo", upload.single("filename"), usersController.addPhoto);
-    
+    user.route('/accountToken').post(usersController.account_token);
+    user.route('/accountStripe').post(usersController.account_stripe);
     user.route('/transaction').post(usersController.transaction);
+    user.route('/createStripeUser').post(usersController.createStripeUser);
+    user.route('/transfer').post(usersController.transfer);
     //user.route('/profile/photo').post(upload.single("foo-bar"),usersController.addPhoto);
 
     return user;

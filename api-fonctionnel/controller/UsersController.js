@@ -44,9 +44,9 @@ module.exports = {
         User.findOne({
                 email:req.body.email
             }, function(err, user) {
-                if (err) {
-                    res.send(err);
-                }
+                /*if (err) {
+                    throw err; //res.send(err);
+                }*/
                 if (user) {
                     if (!user.comparePassword(req.body.password)) {
                         return res.status(401).json({message: 'Authentication failed. Invalid password.'});
@@ -211,28 +211,55 @@ module.exports = {
             //})
         //} else {
         //    res.send({message: "not connected"});
-        //}
+        //
+    },
+
+    account_token: function(req, res) {
+        return stripe.tokens.create({
+            account: {
+                individual: {
+                    first_name: 'Lucas',
+                    last_name: 'CHEN'
+                },
+                tos_shown_and_accepted: true,
+            },
+        }).then(resultat => res.status(200).json(resultat))
+        .catch(error => res.status(400).json(error));
+    },
+
+    account_stripe: function(req, res) {
+        return stripe.accounts.create({
+            country:'US',
+            type:'custom',
+            account_token: req.body.token,
+        }).then(resultat => res.status(200).json(resultat))
+        .catch(error => res.status(400).json(error));
     },
 
     transaction: function(req, res) {
-        stripe.tokens.create({
-            card: {
-              number: '4242424242424242',
-              exp_month: 12,
-              exp_year: 2020,
-              cvc: '123'
-            }
-        }).then(function(result, err) {
-            if (err) {
-              res.send(err);
-            }
-            const tokenId = result["id"];
-            return stripe.charges.create({
-                amount: req.body.amount,
-                currency: 'eur',
-                source: tokenId,
-                description: 'Test payment'
-            }).then(resultat => res.status(200).json(resultat)); 
-        }); 
+        return stripe.charges.create({
+            amount: req.body.amount,
+            currency: 'eur',
+            source: req.body.token,
+            description: 'Test payment'
+        }).then(resultat => res.status(200).json(resultat))
+        .catch(error => res.status(400).json(error));
+    },
+
+    createStripeUser: function(req, res) {
+        return stripe.customers.create({
+            email: req.body.email,
+            source: req.body.token
+        }).then(resultat => res.status(200).json(resultat))
+        .catch(error => res.status(400).json(error));
+    },
+
+    transfer: function(req, res) {
+        return stripe.transfers.create({
+            amount: req.body.amount,
+            currency: 'eur',
+            destination: req.body.destination
+        }).then(resultat => res.status(200).json(resultat))
+        .catch(error => res.status(400).json(error));
     }
 }
